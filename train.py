@@ -29,7 +29,7 @@ if len(get_available_gpus()) == 0:
 
 with tf.Graph().as_default():
   #tf.compat.v1.reset_default_graph()
-  saver = tf.compat.v1.train.import_meta_graph('checkpoint/infer.meta')
+  saver = tf.compat.v1.train.import_meta_graph('checkpoint/infer/infer.meta')
   graph = tf.compat.v1.get_default_graph()
   input_graph_def = graph.as_graph_def()
   sess = tf.compat.v1.Session()
@@ -75,7 +75,7 @@ for l in classifier.layers:
     l.trainable = False
 
 classifier_models = list()
-classifier.load_weights("classifier_checkpoint/model.ckpt")
+classifier.load_weights("classifier_checkpoint/model.ckpt-18637")
 perceptual_layers = [0, 3, 4, 5, 6, 8]
 for layer_index in range(len(perceptual_layers)):
   classifier_models.append(tf.keras.Sequential(classifier.layers[0:layer_index]))
