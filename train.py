@@ -33,7 +33,7 @@ with tf.Graph().as_default():
   graph = tf.compat.v1.get_default_graph()
   input_graph_def = graph.as_graph_def()
   sess = tf.compat.v1.Session()
-  saver.restore(sess, 'checkpoint/model.ckpt')
+  saver.restore(sess, 'checkpoint/model.ckpt-18637')
 
   output_node_names="G_z"
   output_graph_def = tf.compat.v1.graph_util.convert_variables_to_constants(
@@ -81,40 +81,40 @@ for layer_index in range(len(perceptual_layers)):
   classifier_models.append(tf.keras.Sequential(classifier.layers[0:layer_index]))
 
 
-train_files = glob.glob("datasets/sc09/train/*")
+train_files = glob.glob("datasets/train/*")
 random.shuffle(train_files)
 def train_generator():
   for x in range(0, len(train_files)):
     path = train_files[x]
-    path_label = path.split("/")[-1].split("_")[0]
+    # path_label = path.split("/")[-1].split("_")[0]
     sr, audio = scipy.io.wavfile.read(path)
-    if "sc09" in path:
-        audio = audio.astype(np.float32)
-        audio = audio / 32767
-        audio = audio * 1.414
-        audio = librosa.core.resample(audio, 16000, 16384)
-    audio = audio[0:16384]
-    data = np.zeros(16384)
-    data[0:audio.shape[0]] = audio
+    # if "sc09" in path:
+    # audio = audio.astype(np.float32)
+    # audio = audio / 32767
+        # audio = audio * 1.414
+        # audio = librosa.core.resample(audio, 16000, 16384)
+    # audio = audio[0:16384]
+    # data = np.zeros(16384)
+    # data[0:audio.shape[0]] = audio
 
     yield 0, data
 
 
-valid_files = glob.glob("datasets/sc09/valid/*")
+valid_files = glob.glob("datasets/valid/*")
 def valid_generator():
   for x in range(0, len(train_files)):
     path = valid_files[x]
-    path_label = path.split("/")[-1].split("_")[0]
+    # path_label = path.split("/")[-1].split("_")[0]
 
     sr, audio = scipy.io.wavfile.read(path)
-    audio = audio.astype(np.float32)
-    audio = audio / 32767
-    audio = audio * 1.414
-    audio = librosa.core.resample(audio, 16000, 16384)
-    data = np.zeros(16384)
-    data[0:audio.shape[0]] = audio
+    # audio = audio.astype(np.float32)
+    # audio = audio / 32767
+    # audio = audio * 1.414
+    # audio = librosa.core.resample(audio, 16000, 16384)
+    # data = np.zeros(16384)
+    # data[0:audio.shape[0]] = audio
 
-    yield 0, data
+    yield 0, audio
 
 loss_object = tf.keras.losses.MeanSquaredError()
 mse = tf.keras.losses.MeanSquaredError()
@@ -340,12 +340,9 @@ for epoch in range(starting_epoch, 250):
   inversed_mapped_generated_sound = _G_z
 
   for x in range(0, num_samples):
-    scipy.io.wavfile.write("waves/original_"+str(epoch)+"sample_"+str(x)+".wav", 16384, original_generated_sound.numpy()[x])
-    scipy.io.wavfile.write("waves/inverse_mapping_"+str(epoch)+"sample_"+str(x)+".wav", 16384, inversed_mapped_generated_sound.numpy()[x])
+    scipy.io.wavfile.write("waves/original_"+str(epoch)+"sample_"+str(x)+".wav", 44100, original_generated_sound.numpy()[x])
+    scipy.io.wavfile.write("waves/inverse_mapping_"+str(epoch)+"sample_"+str(x)+".wav", 44100, inversed_mapped_generated_sound.numpy()[x])
 
 
   inverse_mapping_model.save_weights("inverse_mapping_model_checkpoint/generated_and_real_training.ckpt")
   np.save("inverse_mapping_model_checkpoint/epoch.npy", np.zeros(1)*epoch)
-
-
-
